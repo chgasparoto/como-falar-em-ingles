@@ -1,4 +1,3 @@
-
 data "aws_route53_zone" "this" {
   count = local.has_domain ? 1 : 0
 
@@ -6,7 +5,7 @@ data "aws_route53_zone" "this" {
 }
 
 resource "aws_route53_record" "website" {
-  count = local.has_domain ? 1 : 0
+  count = local.has_domain && var.environment == "prod" ? 1 : 0
 
   name    = local.domain
   type    = "A"
@@ -20,7 +19,7 @@ resource "aws_route53_record" "website" {
 }
 
 resource "aws_route53_record" "www" {
-  count = local.has_domain ? 1 : 0
+  count = local.has_domain && var.environment == "prod" ? 1 : 0
 
   name    = "www.${local.domain}"
   type    = "A"
@@ -50,4 +49,12 @@ resource "aws_route53_record" "cert_validation" {
   ttl             = 60
   type            = each.value.type
   zone_id         = data.aws_route53_zone.this[0].zone_id
+}
+
+resource "aws_route53_record" "sub_api" {
+  zone_id = data.aws_route53_zone.this[0].zone_id
+  type    = "NS"
+  name    = "api.${local.domain}"
+  records = data.aws_route53_zone.this[0].name_servers
+  ttl     = "86400"
 }

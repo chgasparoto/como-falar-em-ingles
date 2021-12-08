@@ -11,7 +11,6 @@ module "logs" {
   name          = "${local.domain}-logs"
   acl           = "log-delivery-write"
   force_destroy = !local.has_domain
-  tags          = local.common_tags
 }
 
 module "website" {
@@ -20,7 +19,6 @@ module "website" {
   acl           = "public-read"
   policy        = data.template_file.s3-public-policy.rendered
   force_destroy = !local.has_domain
-  tags          = local.common_tags
 
   versioning = {
     enabled = true
@@ -43,7 +41,6 @@ module "redirect" {
   name          = "www.${local.domain}"
   acl           = "public-read"
   force_destroy = !local.has_domain
-  tags          = local.common_tags
 
   website = {
     redirect_all_requests_to = local.has_domain ? var.domain : module.website.website
