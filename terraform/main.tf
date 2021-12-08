@@ -1,0 +1,31 @@
+
+terraform {
+  required_version = "~> 1.0.11"
+
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~> 3.66.0"
+    }
+    archive = {
+      source  = "hashicorp/archive"
+      version = "~> 2.2.0"
+    }
+  }
+
+  backend "s3" {}
+}
+
+provider "aws" {
+  region = var.aws_region
+
+  default_tags {
+    tags = {
+      Application = "Como Falar Em Inglês"
+      ManagedBy   = "Terraform"
+      Owner       = "Cleber Gasparoto"
+      Environment = var.environment
+      GitRepo     = "https://github.com/chgasparoto/como-falar-em-ingles"
+    }
+  }
+}
