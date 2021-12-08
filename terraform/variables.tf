@@ -9,10 +9,22 @@ variable "aws_region" {
   description = "The AWS Region to deploy to"
 }
 
+variable "aws_profile" {
+  type        = string
+  description = "The AWS Profile to use to execute the Terraform commands"
+  default     = "default"
+}
+
 variable "service_name" {
   type        = string
   description = "The service name"
   default     = "como-falar-em-ingles"
+}
+
+variable "domain" {
+  type        = string
+  description = "The accessible domain for the final users"
+  default     = ""
 }
 
 variable "log_level" {

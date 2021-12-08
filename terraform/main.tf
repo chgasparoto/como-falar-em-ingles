@@ -1,4 +1,3 @@
-
 terraform {
   required_version = "~> 1.0.11"
 
@@ -17,7 +16,8 @@ terraform {
 }
 
 provider "aws" {
-  region = var.aws_region
+  region  = var.aws_region
+  profile = var.aws_profile
 
   default_tags {
     tags = {
@@ -28,4 +28,14 @@ provider "aws" {
       GitRepo     = "https://github.com/chgasparoto/como-falar-em-ingles"
     }
   }
+}
+
+provider "aws" {
+  region  = "us-east-1"
+  profile = var.aws_profile
+  alias   = "us-east-1"
+}
+
+resource "random_pet" "website" {
+  length = 5
 }
