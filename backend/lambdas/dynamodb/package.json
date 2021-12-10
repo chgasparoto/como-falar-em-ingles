@@ -1,0 +1,42 @@
+{
+  "name": "dynamodb",
+  "version": "1.0.0",
+  "description": "",
+  "main": "src/index.js",
+  "directories": {
+    "test": "tests"
+  },
+  "scripts": {
+    "test": "jest",
+    "test:watch": "npm run test -- --watch",
+    "test:coverage": "npm run test -- --coverage",
+    "lint": "eslint \"./{src,tests}/**/*.js\"",
+    "lint:fix": "eslint --fix \"./{src,tests}/**/*.js\""
+  },
+  "keywords": [],
+  "author": "Cleber Gasparoto <chgasparoto@gmail.com> (https://github.com/chgasparoto)",
+  "license": "ISC",
+  "devDependencies": {
+    "@middy/core": "^2.5.3",
+    "@newrelic/aws-sdk": "^4.0.1",
+    "aws-sdk": "^2.1032.0",
+    "eslint": "^8.2.0",
+    "eslint-config-prettier": "^8.3.0",
+    "eslint-plugin-import": "^2.25.3",
+    "eslint-plugin-jest": "^25.2.4",
+    "eslint-plugin-prettier": "^4.0.0",
+    "jest": "^27.3.1",
+    "joi": "^17.4.2",
+    "prettier": "^2.4.1"
+  },
+  "jest": {
+    "testEnvironment": "node",
+    "collectCoverage": true,
+    "collectCoverageFrom": [
+      "src/**/*.js"
+    ],
+    "globals": {
+      "jest": true
+    }
+  }
+}

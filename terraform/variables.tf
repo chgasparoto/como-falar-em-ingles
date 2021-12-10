@@ -31,3 +31,23 @@ variable "log_level" {
   description = "The level that the logs should be logged"
   default     = "INFO"
 }
+
+variable "lambda_config" {
+  description = "Lambdas configuration"
+
+  type = map(object({
+    name        = string
+    description = string
+    handler     = string
+    arch        = list(string)
+    runtime     = string
+    memory      = number
+    timeout     = number
+  }))
+}
+
+variable "cw_logs_retention_days" {
+  type        = number
+  description = "Number of days to retain the logs in Cloudwatch"
+  default     = 3
+}

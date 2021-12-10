@@ -6,7 +6,12 @@ locals {
 
   namespaced_service_name = "${var.service_name}-${var.environment}"
 
-  is_prod          = var.environment == "prod"
+  lambdas_path = "${path.module}/../backend/lambdas"
+  layers_path  = "${path.module}/../backend/lambda-layers"
+
+  is_prod = var.environment == "prod"
+
+  sub_domain_name  = "api.${var.domain}"
   regional_domain  = module.website.regional_domain_name
   website_filepath = "${path.module}/../frontend"
 

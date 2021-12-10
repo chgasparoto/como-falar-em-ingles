@@ -45,10 +45,14 @@ resource "aws_route53_record" "cert_validation" {
   zone_id         = data.aws_route53_zone.this.zone_id
 }
 
-resource "aws_route53_record" "sub_api" {
+resource "aws_route53_record" "sub_domain" {
+  name    = local.sub_domain_name
+  type    = "A"
   zone_id = data.aws_route53_zone.this.zone_id
-  type    = "NS"
-  name    = "api.${var.domain}"
-  records = data.aws_route53_zone.this.name_servers
-  ttl     = "86400"
+
+  alias {
+    evaluate_target_health = false
+    name                   = aws_api_gateway_domain_name.this.cloudfront_domain_name
+    zone_id                = aws_api_gateway_domain_name.this.cloudfront_zone_id
+  }
 }
