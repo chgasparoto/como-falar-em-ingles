@@ -1,0 +1,105 @@
+name: Deploy the current changes to the given environment and AWS region
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        required: false
+        description: 'The environment to deploy to'
+        default: 'dev'
+      region:
+        required: false
+        description: 'The AWS region to deploy to'
+        default: 'eu-central-1'
+
+env:
+  NODE_VERSION: 14.18.1
+  TERRAFORM_VERSION: 1.0.11
+
+jobs:
+  deployment:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    defaults:
+      run:
+        shell: bash
+        working-directory: ${{ env.TF_WORKING_DIR }}
+
+    env:
+      AWS_REGION: ${{ github.event.inputs.region }}
+      TF_WORKING_DIR: 'terraform'
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          token: ${{ secrets.GLOBAL_GITHUB_TOKEN }}
+
+      - name: Using Node ${{ env.NODE_VERSION }}
+        uses: actions/setup-node@v1
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Install Dependencies
+        run: "${GITHUB_WORKSPACE}/.github/scripts/install-lambda-layers-deps.sh"
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GLOBAL_JFROG_ARTIFACTORY_TOKEN }}
+          GITHUB_WORKSPACE: ${{ env.GITHUB_WORKSPACE }}
+
+      - name: Run lint
+        run: "${GITHUB_WORKSPACE}/.github/scripts/run-lint.sh"
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GLOBAL_JFROG_ARTIFACTORY_TOKEN }}
+          GITHUB_WORKSPACE: ${{ env.GITHUB_WORKSPACE }}
+
+      - name: Run tests
+        run: "${GITHUB_WORKSPACE}/.github/scripts/run-lambdas-unit-tests.sh"
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GLOBAL_JFROG_ARTIFACTORY_TOKEN }}
+          GITHUB_WORKSPACE: ${{ env.GITHUB_WORKSPACE }}
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v1
+        with:
+          terraform_version: ${{ env.TERRAFORM_VERSION }}
+
+      - name: Configure AWS for Dev
+        if: github.event.inputs.environment == 'dev'
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+          role-to-assume: arn:aws:iam::029720204697:role/automation-gha-ci
+
+      - name: Configure AWS for Stage
+        if: github.event.inputs.environment == 'stage'
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+          role-to-assume: arn:aws:iam::988478710043:role/automation-gha-ci
+
+      - name: Configure AWS for Prod
+        if: github.event.inputs.environment == 'prod'
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+          role-to-assume: arn:aws:iam::251511879130:role/automation-gha-ci
+
+      - name: Terraform Format
+        id: fmt
+        run: terraform fmt -check
+
+      - name: Terraform Init
+        run: terraform init -backend=true -backend-config=./config/${{ github.event.inputs.environment }}/config.remote
+
+      - name: Terraform Validate
+        run: terraform validate -no-color
+
+      - name: Terraform Apply
+        run: terraform apply -auto-approve -no-color -var-file=./config/${{ github.event.inputs.environment }}/terraform.tfvars
