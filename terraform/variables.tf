@@ -24,7 +24,6 @@ variable "service_name" {
 variable "domain" {
   type        = string
   description = "The accessible domain for the final users"
-  default     = ""
 }
 
 variable "log_level" {

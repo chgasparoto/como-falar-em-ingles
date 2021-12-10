@@ -1,24 +1,22 @@
 data "template_file" "s3-public-policy" {
   template = file("s3-public-policy.json")
   vars = {
-    bucket_name = local.domain
+    bucket_name = var.domain
     cdn_oai     = aws_cloudfront_origin_access_identity.this.id
   }
 }
 
 module "logs" {
-  source        = "github.com/chgasparoto/terraform-s3-object-notification"
-  name          = "${local.domain}-logs"
-  acl           = "log-delivery-write"
-  force_destroy = !local.has_domain
+  source = "github.com/chgasparoto/terraform-s3-object-notification"
+  name   = "${var.domain}-logs"
+  acl    = "log-delivery-write"
 }
 
 module "website" {
-  source        = "github.com/chgasparoto/terraform-s3-object-notification"
-  name          = local.domain
-  acl           = "public-read"
-  policy        = data.template_file.s3-public-policy.rendered
-  force_destroy = !local.has_domain
+  source = "github.com/chgasparoto/terraform-s3-object-notification"
+  name   = var.domain
+  acl    = "public-read"
+  policy = data.template_file.s3-public-policy.rendered
 
   versioning = {
     enabled = true
@@ -37,12 +35,12 @@ module "website" {
 }
 
 module "redirect" {
-  source        = "github.com/chgasparoto/terraform-s3-object-notification"
-  name          = "www.${local.domain}"
-  acl           = "public-read"
-  force_destroy = !local.has_domain
+  source = "github.com/chgasparoto/terraform-s3-object-notification"
+  name   = "www.${var.domain}"
+  acl    = "public-read"
+
 
   website = {
-    redirect_all_requests_to = local.has_domain ? var.domain : module.website.website
+    redirect_all_requests_to = var.domain
   }
 }

@@ -1,3 +1,5 @@
 environment = "dev"
 aws_region  = "eu-central-1"
+aws_profile = "tf014"
 log_level   = "DEBUG"
+domain      = "clashflix.com"

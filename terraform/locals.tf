@@ -6,8 +6,7 @@ locals {
 
   namespaced_service_name = "${var.service_name}-${var.environment}"
 
-  has_domain       = var.domain != ""
-  domain           = local.has_domain ? var.domain : random_pet.website.id
+  is_prod          = var.environment == "prod"
   regional_domain  = module.website.regional_domain_name
   website_filepath = "${path.module}/../frontend"
 

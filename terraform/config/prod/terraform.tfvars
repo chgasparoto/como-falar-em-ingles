@@ -1,4 +1,5 @@
 environment = "prod"
 aws_region  = "eu-central-1"
+aws_profile = "ggasparoto_macbook"
 log_level   = "WARN"
 domain      = "comofalaremingles.com"
