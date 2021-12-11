@@ -1,37 +1,71 @@
 resource "aws_api_gateway_rest_api" "this" {
   name = local.namespaced_service_name
-  body = jsonencode({
-    openapi = "3.0.1"
-    info = {
-      title   = local.namespaced_service_name
-      version = "1.0"
-    }
-    paths = {
-      "/user" = {
-        get = {
-          x-amazon-apigateway-integration = {
-            "type" : "aws_proxy",
-            "httpMethod" : "POST",
-            "uri" : aws_lambda_function.dynamodb.invoke_arn,
-            "responses" : {
-              "default" : {
-                "statusCode" : "200"
-              }
-            },
-            "passthroughBehavior" : "when_no_match",
-            "contentHandling" : "CONVERT_TO_TEXT"
-          }
-        }
-      }
-    }
-  })
+}
+
+resource "aws_api_gateway_api_key" "this" {
+  name = var.environment
+}
+
+resource "aws_api_gateway_usage_plan_key" "this" {
+  key_id        = aws_api_gateway_api_key.this.id
+  key_type      = "API_KEY"
+  usage_plan_id = aws_api_gateway_usage_plan.this.id
+}
+
+resource "aws_api_gateway_usage_plan" "this" {
+  name = "${local.namespaced_service_name}-usage-plan"
+
+  api_stages {
+    api_id = aws_api_gateway_rest_api.this.id
+    stage  = aws_api_gateway_stage.this.stage_name
+  }
+}
+
+resource "aws_api_gateway_resource" "v1" {
+  rest_api_id = aws_api_gateway_rest_api.this.id
+  parent_id   = aws_api_gateway_rest_api.this.root_resource_id
+  path_part   = "v1"
+}
+
+resource "aws_api_gateway_resource" "todos" {
+  rest_api_id = aws_api_gateway_rest_api.this.id
+  parent_id   = aws_api_gateway_resource.v1.id
+  path_part   = "todos"
+}
+
+resource "aws_api_gateway_method" "any" {
+  rest_api_id      = aws_api_gateway_rest_api.this.id
+  resource_id      = aws_api_gateway_resource.todos.id
+  authorization    = "NONE"
+  http_method      = "ANY"
+  api_key_required = true
+}
+
+resource "aws_api_gateway_integration" "this" {
+  rest_api_id             = aws_api_gateway_rest_api.this.id
+  resource_id             = aws_api_gateway_resource.todos.id
+  http_method             = aws_api_gateway_method.any.http_method
+  integration_http_method = "POST"
+  type                    = "AWS_PROXY"
+  uri                     = aws_lambda_function.dynamodb.invoke_arn
 }
 
 resource "aws_api_gateway_deployment" "this" {
   rest_api_id = aws_api_gateway_rest_api.this.id
 
   triggers = {
-    redeployment = sha1(jsonencode(aws_api_gateway_rest_api.this.body))
+    # NOTE: The configuration below will satisfy ordering considerations,
+    #       but not pick up all future REST API changes. More advanced patterns
+    #       are possible, such as using the filesha1() function against the
+    #       Terraform configuration file(s) or removing the .id references to
+    #       calculate a hash against whole resources. Be aware that using whole
+    #       resources will show a difference after the initial implementation.
+    #       It will stabilize to only change when resources change afterwards.
+    redeployment = sha1(jsonencode([
+      aws_api_gateway_resource.todos.id,
+      aws_api_gateway_method.any.id,
+      aws_api_gateway_integration.this.id,
+    ]))
   }
 
   lifecycle {

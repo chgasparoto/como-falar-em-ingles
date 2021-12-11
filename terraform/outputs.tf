@@ -9,3 +9,7 @@ output "cdn-url" {
 output "distribution-id" {
   value = aws_cloudfront_distribution.this.id
 }
+
+output "api-url" {
+  value = local.sub_domain_name
+}
