@@ -105,6 +105,7 @@ dist
 
 # Terraform local files
 .terraform
+terraform/files
 
 # Webstorm local files
 .idea
