@@ -1,22 +1,22 @@
-data "archive_file" "dynamodb_artefact" {
+data "archive_file" "expressions_artefact" {
   type        = "zip"
-  output_path = "${path.module}/files/dynamodb.zip"
-  source_dir  = "${local.lambdas_path}/dynamodb/src"
+  output_path = "${path.module}/files/expressions.zip"
+  source_dir  = "${local.lambdas_path}/expressions"
 }
 
-resource "aws_lambda_function" "dynamodb" {
-  function_name = "${local.namespaced_service_name}-${var.lambda_config["dynamodb"].name}"
-  description   = var.lambda_config["dynamodb"].description
-  role          = aws_iam_role.dynamodb_lambda.arn
+resource "aws_lambda_function" "expressions_post" {
+  function_name = "${local.namespaced_service_name}-${var.lambda_config["expressions_post"].name}"
+  description   = var.lambda_config["expressions_post"].description
+  role          = aws_iam_role.expressions_post_lambda.arn
 
-  handler       = var.lambda_config["dynamodb"].handler
-  architectures = var.lambda_config["dynamodb"].arch
-  runtime       = var.lambda_config["dynamodb"].runtime
-  timeout       = var.lambda_config["dynamodb"].timeout
-  memory_size   = var.lambda_config["dynamodb"].memory
+  handler       = var.lambda_config["expressions_post"].handler
+  architectures = var.lambda_config["expressions_post"].arch
+  runtime       = var.lambda_config["expressions_post"].runtime
+  timeout       = var.lambda_config["expressions_post"].timeout
+  memory_size   = var.lambda_config["expressions_post"].memory
 
-  filename         = data.archive_file.dynamodb_artefact.output_path
-  source_code_hash = data.archive_file.dynamodb_artefact.output_base64sha256
+  filename         = data.archive_file.expressions_artefact.output_path
+  source_code_hash = data.archive_file.expressions_artefact.output_base64sha256
 
   tracing_config {
     mode = "Active"
@@ -29,7 +29,7 @@ resource "aws_lambda_function" "dynamodb" {
 
 resource "aws_lambda_permission" "api" {
   action        = "lambda:InvokeFunction"
-  function_name = aws_lambda_function.dynamodb.arn
+  function_name = aws_lambda_function.expressions_post.arn
   principal     = "apigateway.amazonaws.com"
   source_arn    = "arn:aws:execute-api:${var.aws_region}:${local.account_id}:*/*"
 }

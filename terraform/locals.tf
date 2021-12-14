@@ -20,5 +20,6 @@ locals {
     NODE_ENV                            = var.environment
     ENVIRONMENT                         = var.environment
     AWS_NODEJS_CONNECTION_REUSE_ENABLED = 1
+    DYNAMO_DB_TABLE_NAME                = aws_dynamodb_table.this.name
   }
 }
