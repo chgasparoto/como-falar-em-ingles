@@ -18,6 +18,12 @@ resource "aws_lambda_function" "expressions_post" {
   filename         = data.archive_file.expressions_artefact.output_path
   source_code_hash = data.archive_file.expressions_artefact.output_base64sha256
 
+  layers = [
+    module.layers["utils"].arn,
+    module.layers["middy"].arn,
+    module.layers["middlewares"].arn,
+  ]
+
   tracing_config {
     mode = "Active"
   }

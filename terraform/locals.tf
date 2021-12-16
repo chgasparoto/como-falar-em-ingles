@@ -9,6 +9,12 @@ locals {
   lambdas_path = "${path.module}/../backend/lambdas"
   layers_path  = "${path.module}/../backend/lambda-layers"
 
+  lambda_layers = {
+    utils       = "Utils for general purposes",
+    middlewares = "Middy middlewares"
+    middy = "Middy packages"
+  }
+
   is_prod = var.environment == "prod"
 
   sub_domain_name  = "api.${var.domain}"

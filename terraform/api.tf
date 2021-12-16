@@ -56,7 +56,32 @@ resource "aws_api_gateway_base_path_mapping" "this" {
   domain_name = aws_api_gateway_domain_name.this.domain_name
 }
 
-### Create record in database
+### Create category record in database
+
+resource "aws_api_gateway_resource" "categories" {
+  rest_api_id = aws_api_gateway_rest_api.this.id
+  parent_id   = aws_api_gateway_resource.v1.id
+  path_part   = "categories"
+}
+
+resource "aws_api_gateway_method" "categories_post" {
+  rest_api_id      = aws_api_gateway_rest_api.this.id
+  resource_id      = aws_api_gateway_resource.categories.id
+  authorization    = "NONE"
+  http_method      = "POST"
+  api_key_required = true
+}
+
+resource "aws_api_gateway_integration" "categories_post" {
+  rest_api_id             = aws_api_gateway_rest_api.this.id
+  resource_id             = aws_api_gateway_resource.categories.id
+  http_method             = aws_api_gateway_method.categories_post.http_method
+  integration_http_method = "POST"
+  type                    = "AWS_PROXY"
+  uri                     = aws_lambda_function.categories_post.invoke_arn
+}
+
+### Create expression record in database
 
 resource "aws_api_gateway_resource" "expressions" {
   rest_api_id = aws_api_gateway_rest_api.this.id
