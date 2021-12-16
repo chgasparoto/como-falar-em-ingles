@@ -1,7 +1,7 @@
 #!/bin/sh
 set -e # exit on error
 
-cd "${GITHUB_WORKSPACE}/lambda-layers"
+cd "${GITHUB_WORKSPACE}/backend/lambda-layers"
 
 for dir in $(find $(pwd) -name 'nodejs')
 do

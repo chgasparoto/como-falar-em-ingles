@@ -1,7 +1,12 @@
-const AWS = require('aws-sdk');
-const dynamo = new AWS.DynamoDB.DocumentClient();
+const DynamoDB = require('aws-sdk/clients/dynamodb');
+const middy = require('@middy/core');
+const inputOutputLogger = require('@middy/input-output-logger');
+const errorLogger = require('@middy/error-logger');
+const { v4: uuidv4 } = require('uuid');
 
-exports.handler = async event => {
+const dynamo = new DynamoDB.DocumentClient();
+
+const baseHandler = async (event) => {
     if (process.env.DEBUG) {
         console.log({
             message: 'Received event',
@@ -12,13 +17,14 @@ exports.handler = async event => {
     try {
         const tableName = process.env.DYNAMO_DB_TABLE_NAME;
         const data = JSON.parse(event['body']);
+        const id = uuidv4();
 
         const params = {
             TableName: tableName,
             Item: {
-                pk: 'c#2',
-                sk: 'c#2',
-                entity_type: 'category',
+                pk: `e#${id}`,
+                sk: `e#${id}`,
+                entity_type: 'expression',
                 expression: data,
                 created_at: new Date().toISOString(),
             },
@@ -27,20 +33,18 @@ exports.handler = async event => {
         await dynamo.put(params).promise();
 
         console.log({
-            message: 'Record has been created',
+            message: `Record ${id} has been created`,
             data: JSON.stringify(params),
         });
 
         return {
             statusCode: 201,
-            body: 'Record has been created',
+            body: JSON.stringify(`Record ${id} has been created`),
             headers: {
                 'Content-Type': 'application/json',
             },
-        }
-
+        };
     } catch (err) {
-        console.error(err);
         return {
             statusCode: 500,
             body: JSON.stringify('Something went wrong'),
@@ -50,3 +54,7 @@ exports.handler = async event => {
         };
     }
 };
+
+const handler = middy(baseHandler).use(inputOutputLogger()).use(errorLogger());
+
+module.exports = { handler };

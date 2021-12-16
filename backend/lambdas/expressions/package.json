@@ -1,0 +1,27 @@
+{
+  "name": "expressions",
+  "version": "1.0.0",
+  "description": "",
+  "main": "post.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@middy/core": "^2.5.3",
+    "@middy/error-logger": "^2.5.3",
+    "@middy/input-output-logger": "^2.5.3",
+    "joi": "^17.5.0",
+    "uui": "^1.0.7",
+    "aws-sdk": "^2.1032.0",
+    "eslint": "^8.2.0",
+    "eslint-config-prettier": "^8.3.0",
+    "eslint-plugin-import": "^2.25.3",
+    "eslint-plugin-jest": "^25.2.4",
+    "eslint-plugin-prettier": "^4.0.0",
+    "jest": "^27.3.1",
+    "prettier": "^2.4.1"
+  }
+}

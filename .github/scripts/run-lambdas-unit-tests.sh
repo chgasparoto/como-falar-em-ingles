@@ -1,7 +1,7 @@
 #!/bin/sh
 set -e
 
-cd "${GITHUB_WORKSPACE}/lambdas"
+cd "${GITHUB_WORKSPACE}/backend/lambdas"
 
 for dir in $(find $(pwd) -type d -mindepth 1 -maxdepth 1)
 do
